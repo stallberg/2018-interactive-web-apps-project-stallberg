@@ -1,0 +1,19 @@
+body {
+    font: 14px "Century Gothic", Futura, sans-serif;
+    margin: 20px;
+  }
+
+
+#add-portfolio-button {
+  margin-bottom: 2%;
+}
+
+#portfolio-container {
+  width: 700px;
+}
+
+.portfolio {
+  margin-bottom: 2%;
+  border: 1px solid black;
+}
+  
