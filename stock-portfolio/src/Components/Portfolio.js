@@ -44,7 +44,7 @@ export default class Portfolio extends React.Component {
 
 				<TableData 
 					data={this.state.stocks}
-					onChange={this.handleChecked}
+					handleChecked={this.handleChecked}
 					exchangeRate={this.state.currentExchangeRate}
 					currency={this.state.currency}
 				/>
@@ -57,7 +57,7 @@ export default class Portfolio extends React.Component {
 		)
 	}
 
-	addStock = (ticker, amount) => {
+	addStock = (ticker, amount) => {		
 		console.log(`ticker: ${ticker}   amount: ${amount}`);
 
 		const API_KEY = "CH6O6Y963H07848Q"
@@ -68,22 +68,20 @@ export default class Portfolio extends React.Component {
 				return response.json()
 
 			.then(json => {
-				let lastRefreshed = json['Meta Data']['3. Last Refreshed']
 				let dailyValues = json['Time Series (Daily)']
+				//take the first (latest day)
 				for(let key in dailyValues) {				
-					if(key === lastRefreshed){
-						let closeValue = parseFloat(dailyValues[key]['4. close'])
-						this.updateStocks(ticker, amount, closeValue)
-
-		
-					}
+					let closeValue = parseFloat(dailyValues[key]['4. close'])
+					this.updateStocks(ticker, amount, closeValue)
+					break
 				}	
 				
 			})
 
-			.catch(error => {
+			.catch((error) => {
 				// alert(`Ticker ${ticker} could not be found. Please give a valid ticker name.`)
-				// alert(error)
+				console.log(error);
+				
 			})
 
 		})
@@ -125,6 +123,9 @@ export default class Portfolio extends React.Component {
 		this.setState({
 			value: value
 		})
+
+		console.log("value updated");
+		
 	
 	}
 
