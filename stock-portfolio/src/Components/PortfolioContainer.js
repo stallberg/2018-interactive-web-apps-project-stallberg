@@ -21,7 +21,6 @@ export default class PortfolioContainer extends React.Component {
 		return (
 			<div id="portfolio-container">
 				<button id="add-portfolio-button" onClick={this.createNewPortfolio}>Add new portfolio</button>
-				{/* <Portfolio name={"teppo"} onRemove={this.removePortfolio} euroExchangeRate={this.state.euroExchangeRate}/> */}
 				<div>
 					{
 						this.state.portfolios.map((item, index) => (
@@ -47,7 +46,12 @@ export default class PortfolioContainer extends React.Component {
 			return;
 		}
 
-		let portfolioName = prompt("Please enter the name of the portfolio")
+		let portfolioName = ""
+		while(portfolioName === ""){
+			portfolioName = prompt("Please enter the name of the portfolio")
+		}
+		
+		if(portfolioName === null) return	// user clicks cancel
 		let portfolio = {
 			name: portfolioName,
 		}

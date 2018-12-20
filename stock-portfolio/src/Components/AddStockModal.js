@@ -29,7 +29,7 @@ const footerStyle = {
 }
 
 
-export default class Modal extends React.Component {
+export default class AddStockModal extends React.Component {
 
     constructor(props) {
         super(props)
@@ -99,7 +99,7 @@ export default class Modal extends React.Component {
 
 }
 
-Modal.propTypes = {
+AddStockModal.propTypes = {
     onClose: PropTypes.func.isRequired,
     onAdd: PropTypes.func.isRequired,
     show: PropTypes.bool.isRequired
