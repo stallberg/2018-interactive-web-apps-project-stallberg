@@ -1,6 +1,7 @@
 import React from 'react'
-import '../index.css'
 import Portfolio from './Portfolio'
+import {Button} from 'antd'
+
 
 export default class PortfolioContainer extends React.Component {
 
@@ -20,7 +21,12 @@ export default class PortfolioContainer extends React.Component {
 	render() {
 		return (
 			<div id="portfolio-container">
-				<button id="add-portfolio-button" onClick={this.createNewPortfolio}>Add new portfolio</button>
+				<Button id="add-portfolio-button"
+						type="primary"
+						onClick={this.createNewPortfolio}
+				>
+				Add new portfolio
+				</Button>
 				<div>
 					{
 						this.state.portfolios.map((item, index) => (

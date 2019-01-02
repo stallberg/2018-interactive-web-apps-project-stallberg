@@ -1,19 +1,71 @@
-body {
-    font: 14px "Century Gothic", Futura, sans-serif;
-    margin: 20px;
-  }
 
+#main-content {
+}
+
+#main-header {
+}
+
+#main-header-text {
+  color: white;
+}
 
 #add-portfolio-button {
   margin-bottom: 2%;
 }
 
 #portfolio-container {
-  width: 700px;
+  margin:20px 20px 20px 20px;
 }
 
 .portfolio {
   margin-bottom: 2%;
-  border: 1px solid black;
 }
-  
+
+#perf-graph {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#date-picker {
+  margin-left:25%;
+  margin-right: auto;
+}
+
+.add-modal-input {
+  margin-bottom: 20px;
+}
+
+#add-stock-btn {
+  background-color: #52c41a;
+  margin-right: 2%;
+  color: white;
+}
+
+#perf-graph-btn {
+  background-color: #faad14;
+  color: white;
+}
+
+#perf-graph-btn:disabled {
+  background-color: lightgray;
+  opacity: 0.4;
+  color: black;
+}
+
+#delete-selected-btn {
+  background-color: #f5222d;
+  color: white;
+  float: right;
+}
+
+#currency-selector {
+  margin-bottom: 2%;
+}
+
+#table-container {
+  margin-bottom: 1.5%;
+}
+
+#buttons-container {
+  margin-top: 3%;
+}

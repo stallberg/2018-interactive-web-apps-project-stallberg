@@ -1,9 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import '../index.css'
 
 
-export default class TableData extends React.Component {
+export default class StocksTable extends React.Component {
 	render() {
 		let exchangeRate = this.props.exchangeRate
 		let currency = this.props.currency
@@ -32,8 +31,8 @@ export default class TableData extends React.Component {
 	}
 }
 
-TableData.propTypes = {
-    exchangeRate : PropTypes.number.isRequired,
-    currency : PropTypes.string.isRequired,
-    handleChecked : PropTypes.func.isRequired,
+StocksTable.propTypes = {
+	exchangeRate : PropTypes.number.isRequired,
+	currency : PropTypes.string.isRequired,
+	handleChecked : PropTypes.func.isRequired,
 }

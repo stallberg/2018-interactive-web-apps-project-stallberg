@@ -1,90 +1,93 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import '../index.css'
 import AddStockModal from './AddStockModal'
-import TableData from './TableData'
+import StocksTable from './StocksTable'
+import Tablee from './Tablee'
 import PerfGraphModal from './PerfGraphModal';
+import {message, Card, Popconfirm, Button, Radio} from 'antd'
 
-import {LineChart, Line, CartesianGrid, XAxis, YAxis} from 'recharts';
+
 
 export default class Portfolio extends React.Component {
 
 	constructor(props) {
 		super(props)
 		this.state = {
-			value: 1000,
-			stocks : [{
-				ticker: 'AAPL',
-				amount: 10,
-				value: 1000,
-				history: [],
-				toBeDeleted: false,
-			}],
+			value: 0,
+			stocks : [],
 			currentExchangeRate: 1, //Stocks api returns value as USD by default
 			currency: '$',
-			show: false		//Modal showing or not, default state false
+			showAddStockModal: false,	//Modals showing or not, default state false
+			showPerfGraphModal: false,
 		}
 	}
 
 
 	render() {
 		return(
-			<div className="portfolio">
-				{/* This modal will be triggered on or off when user clicks Add Stock*/}
+			<Card 
+				className="portfolio"
+				title={this.props.name}
+				style={{ width: 650 }}
+				extra={
+				<Popconfirm title="Are you sure you want to delete the portfolio?" 
+							okText="Yes" 
+							cancelText="No"
+							onConfirm={() => this.props.onRemove(this.props.name)}>
+					<Button icon="close-circle" type="danger" id="remove-portfolio-btn">
+					</Button>
+				</Popconfirm>}	
+			>
+				
 				<AddStockModal 
-					show={this.state.show} 
-					onClose={this.showModal} 
+					show={this.state.showAddStockModal} 
+					onClose={this.showAddStockModal} 
 					onAdd={this.addStock}>
 				</AddStockModal>
 				
 				<PerfGraphModal
 					stocks={this.state.stocks}
+					show={this.state.showPerfGraphModal}
+					onClose={this.showPerfGraphModal}
 				>
 				</PerfGraphModal>
-
-
-				<button onClick={() => this.props.onRemove(this.props.name)}>Remove portfolio</button>
-
-				<label htmlFor="radio">USD</label>
-				<input className="radio" type="radio" defaultChecked name={this.props.name} value="USD" onChange={this.handleCurrencyChange}/>
-				<label htmlFor="radio">EUR</label>
-				<input className="radio" type="radio" name={this.props.name} value="EUR" onChange={this.handleCurrencyChange}/>
-
-				<h1>{this.props.name}</h1>
-
-				<TableData 
-					data={this.state.stocks}
-					handleChecked={this.handleChecked}
+				
+				{/* Currency selection */}
+				<Radio.Group id="currency-selector" defaultValue="USD" onChange={this.handleCurrencyChange}>
+					<Radio value="USD">USD</Radio>
+					<Radio value="EUR">EUR</Radio>
+				</Radio.Group>
+				
+				{/* Table display for stocks in portfolio */}
+				<Tablee
 					exchangeRate={this.state.currentExchangeRate}
 					currency={this.state.currency}
-				/>
-				
-				<button onClick={this.showModal}>Add Stock</button>
-				<button onClick={this.deleteStocks}>Remove Selected Stocks</button>
+					stocks={this.state.stocks}
+				></Tablee>
 
+				{/* Display portfolio value */}
 				<h3>{"Portfolio value: " + (this.state.value*this.state.currentExchangeRate).toFixed(2) + this.state.currency}</h3>
+				
+				{/* Container for all the buttons */}
+				<div id="buttons-container">
+					<Button id="add-stock-btn" onClick={this.showAddStockModal}>Add Stock</Button>
+					<Button id="perf-graph-btn" onClick={this.showPerfGraphModal} 
+							disabled={this.state.stocks.length === 0}>
+							Perf Graph
+					</Button>
+					<Button id="delete-selected-btn" onClick={this.deleteStocks}>Remove Selected</Button>
+				</div>
+				
 
 				
-				<LineChart width={600} height={300} data={[
-      {name: 'Page A', uv: 4000, pv: 2400, amt: 2400},
-      {name: 'Page B', uv: 3000, pv: 1398, amt: 2210},
-      {name: 'Page C', uv: 2000, pv: 9800, amt: 2290},
-      {name: 'Page D', uv: 2780, pv: 3908, amt: 2000},
-      {name: 'Page E', uv: 1890, pv: 4800, amt: 2181},
-      {name: 'Page F', uv: 2390, pv: 3800, amt: 2500},
-      {name: 'Page G', uv: 3490, pv: 4300, amt: 2100},
-]}>
-					<Line type="monotone" dataKey="uv" stroke="#8884d8" />
-					<CartesianGrid stroke="#ccc" />
-					<XAxis dataKey="name" />
-					<YAxis />
-				</LineChart>
 
-			</div>
+
+			</Card>
 		)
 	}
 
-	addStock = (ticker, amount) => {		
+	addStock = (ticker, amount) => {
+		//debug purposes	
 		console.log(`ticker: ${ticker}   amount: ${amount}`);
 
 		const API_KEY = "CH6O6Y963H07848Q"
@@ -95,7 +98,13 @@ export default class Portfolio extends React.Component {
 				return response.json()
 
 			.then(json => {
+				//Given ticker does not exist, return from func
+				if('Error Message' in json) {
+					message.error(`Ticker ${ticker} could not be found. Please give a valid ticker name.`)
+					return
+				}
 				
+				//Get current stock value
 				let dailyValues = json['Time Series (Daily)']
 				let close = parseFloat(dailyValues[Object.keys(dailyValues)[0]]['4. close']);	
 
@@ -103,21 +112,24 @@ export default class Portfolio extends React.Component {
 				let history = []
 				for(let key in dailyValues) {				
 					let closeValue = parseFloat(dailyValues[key]['4. close'])
-					history.push({[key] : closeValue})
+					history.push({date: this.createEuropeanDate(key), value: closeValue})
 				}
+
 				this.updateStocks(ticker, amount, close, history)
-				
-				
 			})
 
 			.catch((error) => {
-				// alert(`Ticker ${ticker} could not be found. Please give a valid ticker name.`)
 				console.log(error);
 				
 			})
 
 		})
 		
+	}
+
+	createEuropeanDate = (dateString) => {
+		let date = new Date(dateString)
+		return date.getDate() + "/" + (date.getMonth() + 1) + "/"+date.getFullYear();
 	}
 
 	updateStocks = (ticker, amount, closeValue, history) => {
@@ -130,6 +142,7 @@ export default class Portfolio extends React.Component {
 		stocks.forEach((stock, index) => {
 			if(stock.ticker === ticker) {
 				alreadyExists = true
+				stocks[index].closeValue = closeValue
 				stocks[index].amount += amount
 				stocks[index].value = stocks[index].amount * closeValue
 				stocks[index].history = history.reverse()
@@ -144,6 +157,7 @@ export default class Portfolio extends React.Component {
 			this.setState(prevState => ({
 				stocks: [...prevState.stocks, {
 					ticker: ticker,
+					closeValue: closeValue,
 					amount: amount,
 					value: amount * closeValue,
 					history : history.reverse(),
@@ -174,21 +188,32 @@ export default class Portfolio extends React.Component {
 	}
 
 	//Switch the modal state between showing and not showing
-	showModal = () => {
+	showAddStockModal = () => {
 		this.setState(({
-			show: !this.state.show
+			showAddStockModal: !this.state.showAddStockModal
+		}))
+	}
+
+	showPerfGraphModal = () => {
+		this.setState(({
+			showPerfGraphModal : !this.state.showPerfGraphModal
 		}))
 	}
 
 	//Make stock checked for deletion when checkbox is checked
-	handleChecked = (e) => {
-		let index = e.target.value
+	// handleChecked = (e) => {
+	// 	let index = e.target.value
+	// 	let stocks = this.state.stocks
+	// 	stocks[index].toBeDeleted = !stocks[index].toBeDeleted
+	// 	this.setState(({
+	// 		stocks : stocks
+	// 	}))
+		
+	// }
+
+	handleChecked = (index) => {
 		let stocks = this.state.stocks
 		stocks[index].toBeDeleted = !stocks[index].toBeDeleted
-		this.setState(({
-			stocks : stocks
-		}))
-		
 	}
 
 	//Remove all stocks checked for deletion
@@ -211,7 +236,23 @@ export default class Portfolio extends React.Component {
 
 	}
 
+	deleteStocks2 = (ticker) => {
+		let newState = this.state.stocks.map((stock) => {
+			if(ticker !== stock.ticker){
+				return stock
+			}
+		})
+		let value = this.calcNewPortfolioValue(newState)
+
+		this.setState({
+			stocks: newState,
+			value: value
+		})
+	}
+
 	handleCurrencyChange = (e) => {
+		console.log("yes");
+		
 		let exchangeRate = null
 		let currency = null
 
