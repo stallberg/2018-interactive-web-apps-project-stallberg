@@ -1,6 +1,7 @@
 import React from 'react'
 import Portfolio from './Portfolio'
-import {Button} from 'antd'
+import {Button, Row, Col} from 'antd'
+import SimpleStorage from "react-simple-storage";
 
 
 export default class PortfolioContainer extends React.Component {
@@ -18,9 +19,11 @@ export default class PortfolioContainer extends React.Component {
 		this.getCurrencyExchangeRates()
 	}
 
+
 	render() {
 		return (
 			<div id="portfolio-container">
+				{/* <SimpleStorage parent={this} /> */}
 				<Button id="add-portfolio-button"
 						type="primary"
 						onClick={this.createNewPortfolio}
@@ -28,18 +31,20 @@ export default class PortfolioContainer extends React.Component {
 				Add new portfolio
 				</Button>
 				<div>
+					<Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32, xl: 40 }} type="flex" justify="center" align="middle">
 					{
 						this.state.portfolios.map((item, index) => (
-							<Portfolio
-								name={item.name} 
-								onRemove={this.removePortfolio}  
-								key={index}
-								euroExchangeRate={this.state.euroExchangeRate}
+							<Col key={index} xs={24} sm={24} md={24} lg={12} xl={10}>
+								<Portfolio
+									name={item.name} 
+									onRemove={this.removePortfolio}  
+									euroExchangeRate={this.state.euroExchangeRate}
 							
-							/>
+								/>
+							</Col>
 						))
 					}
-
+					</Row>
 				</div>
 			</div>
 		)
@@ -83,7 +88,7 @@ export default class PortfolioContainer extends React.Component {
 		let tempArr = this.state.portfolios
 		let newArr = []
 
-		tempArr.forEach((portfolio, index) => {
+		tempArr.forEach((portfolio) => {
 			if (portfolioName !== portfolio.name) {
 				newArr.push(portfolio)
 			}

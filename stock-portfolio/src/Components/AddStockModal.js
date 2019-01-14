@@ -4,108 +4,113 @@ import {Modal, Input, message} from 'antd'
 
 export default class AddStockModal extends React.Component {
 
-    constructor(props) {
-        super(props)
-        this.state = {
-            ticker : "",
-            amount : "",
-        }
-    }
+	constructor(props) {
+		super(props)
+		this.state = {
+			ticker : "",
+			amount : "",
+		}
+	}
 
-    render() {
-        if (!this.props.show) {
-            return null
-        }
-        return(
+	render() {
+		if (!this.props.show) {
+			return null
+		}
+		return(
 
-            <div>
-                <Modal
-                    title="Add Stock"
-                    visible={this.props.show}
-                    onOk={this.addStock}
-                    okText="Add"
-                    onCancel={this.props.onClose}
-                    cancelText="Cancel"
+			<div>
+				<Modal
+					title="Add Stock"
+					visible={this.props.show}
+					onOk={this.addStock}
+					okText="Add"
+					onCancel={this.props.onClose}
+					cancelText="Cancel"
 
-                >
+				>
 
-                <Input 
-                    className="add-modal-input" 
-                    placeholder="Enter stock symbol" 
-                    onInput={e => this.setTicker(e)} 
-                    autoFocus 
-                    />
-                <Input 
-                    className="add-modal-input" 
-                    placeholder="Enter amount"
-                    onInput={e => this.setAmount(e)}
-                    onKeyPress={e => this.onKeyPress(e)}
-                    type="number"
-                    min="1"
-                    />
-                
-                </Modal>
+				<Input 
+					className="add-modal-input" 
+					placeholder="Enter stock symbol" 
+					onInput={e => this.setTicker(e)} 
+					autoFocus 
+					/>
+				<Input 
+					className="add-modal-input" 
+					placeholder="Enter amount"
+					onInput={e => this.setAmount(e)}
+					onKeyPress={e => this.onKeyPress(e)}
+					type="number"
+					min="1"
+					/>
+				
+				</Modal>
 
-            </div>
-        )
-    }
+			</div>
+		)
+	}
 
-    setTicker = (e) => {
-        e.target.value = e.target.value.toUpperCase() 
-        this.setState({
-            ticker : e.target.value
-        })
-    }
+	setTicker = (e) => {
+		e.target.value = e.target.value.toUpperCase() 
+		this.setState({
+			ticker : e.target.value
+		})
+	}
 
-    setAmount = (e) => {
-        //Input can't start with 0
-        if(this.state.amount === "" && parseInt(e.target.value) === 0) {
-            e.target.value = ""
-            return
-        }
-        this.setState({
-            amount : e.target.value
-        })
-    }
+	setAmount = (e) => {
+		//Input can't start with 0
+		if(this.state.amount === "" && parseInt(e.target.value) === 0) {
+			e.target.value = ""
+			return
+		}
+		this.setState({
+			amount : e.target.value
+		})
+	}
 
-    addStock = () => {
+	addStock = () => {
 		if(this.state.ticker === "" || this.state.amount === ""){
-            //alert("Please input the ticker and amount")
-            message.info("Please input the ticker and amount")
+			//alert("Please input the ticker and amount")
+			message.info("Please input the ticker and amount")
+			return
+		}
+		
+		if(this.state.ticker.length < 3 || this.state.ticker.length > 4 ) {
+			message.info("Please input a 3 or 4 letter stock ticker")
 			return
 		}
 
 		this.props.onAdd(this.state.ticker.toUpperCase(), parseInt(this.state.amount))
-        this.props.onClose()
-        
+		this.props.onClose()
+		
 		// Reset the ticker and amount values
-        this.setState({
-            ticker: "",
-            amount: "",
-            })
+		this.setState({
+			ticker: "",
+			amount: "",
+			})
 
-    }
+	}
 
-    //Only 0-9
-    onKeyPress = e => {
-        let valid = /^\d*$/.test(e.key);
-        if(!valid) e.preventDefault()
-        
-        
-        
-    }
+	//Only 0-9
+	onKeyPress = e => {
+		let valid = /^\d*$/.test(e.key);
+		if(!valid) e.preventDefault()
+		
+		
+		
+	}
 
-    inputIsValid = () => {
+	inputIsValid = () => {
 		if(this.state.ticker === "" || this.state.amount === ""){
-            message.info("Please input the ticker and amount")
+			message.info("Please input the ticker and amount")
 			return false
-        }    
-    }
+		}    
+	}
 
 }
 
 AddStockModal.propTypes = {
-    onClose: PropTypes.func.isRequired,
-    onAdd: PropTypes.func.isRequired,
-    show: PropTypes.bool.isRequired
+	onClose: PropTypes.func.isRequired,
+	onAdd: PropTypes.func.isRequired,
+	show: PropTypes.bool.isRequired
 }

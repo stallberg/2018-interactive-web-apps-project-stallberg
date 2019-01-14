@@ -3,7 +3,8 @@ import PropTypes from 'prop-types'
 import AddStockModal from './AddStockModal'
 import StocksTable from './StocksTable'
 import PerfGraphModal from './PerfGraphModal';
-import {message, Card, Popconfirm, Button, Radio} from 'antd'
+import {message, Card, Popconfirm, Button, Radio, Row, Col} from 'antd'
+import SimpleStorage, {clearStorage} from "react-simple-storage";
 
 
 
@@ -11,7 +12,7 @@ export default class Portfolio extends React.Component {
 
 	constructor(props) {
 		super(props)
-		this.child = React.createRef()  //For the table component
+		this.stocksTable = React.createRef()  //For the table component
 		this.state = {
 			value: 0,
 			stocks : [],
@@ -22,22 +23,31 @@ export default class Portfolio extends React.Component {
 		}
 	}
 
+	render() {	
+		return(		
+			<div>
 
-	render() {
-		return(
+			{/*For local storage */}
+			{/* <SimpleStorage parent={this} prefix={this.props.name} /> */}
 			<Card 
 				className="portfolio"
 				title={this.props.name}
-				style={{ width: 650 }}
+				style={{ width: "100%" }}
 				extra={
 				<Popconfirm title="Are you sure you want to delete the portfolio?" 
 							okText="Yes" 
 							cancelText="No"
-							onConfirm={() => this.props.onRemove(this.props.name)}>
+							onConfirm={() => {
+								this.props.onRemove(this.props.name)
+								
+							}
+				}>
 					<Button icon="close-circle" type="danger" id="remove-portfolio-btn">
 					</Button>
 				</Popconfirm>}	
 			>
+			
+
 				
 				{/* The modals. Hidden by default, and shows when buttons are pressed */}
 				<AddStockModal 
@@ -47,7 +57,7 @@ export default class Portfolio extends React.Component {
 				</AddStockModal>
 				
 				<PerfGraphModal
-					stocks={this.state.stocks}
+					stocks={this.state.stocks.filter(stock => stock.checked === true)}
 					show={this.state.showPerfGraphModal}
 					onClose={this.showPerfGraphModal}
 					exchangeRate={this.state.currentExchangeRate}
@@ -56,9 +66,9 @@ export default class Portfolio extends React.Component {
 				</PerfGraphModal>
 				
 				{/* Currency selection */}
-				<Radio.Group id="currency-selector" defaultValue="USD" onChange={this.handleCurrencyChange}>
-					<Radio value="USD">USD</Radio>
-					<Radio value="EUR">EUR</Radio>
+				<Radio.Group id="currency-selector" value={this.state.currency} onChange={this.handleCurrencyChange}>
+					<Radio value="$">USD</Radio>
+					<Radio value="€">EUR</Radio>
 				</Radio.Group>
 				
 				{/* Table display for the stock information */}
@@ -66,8 +76,9 @@ export default class Portfolio extends React.Component {
 					exchangeRate={this.state.currentExchangeRate}
 					currency={this.state.currency}
 					stocks={this.state.stocks}
-					handleChecked={this.markStocksForDeletion}
-					ref={this.child}
+					handleChecked={this.handleCheckedStocks}
+					selectedRowKeys={this.getSelectedRows()}
+					ref={this.stocksTable}
 				></StocksTable>
 
 				{/* Display portfolio value */}
@@ -77,10 +88,13 @@ export default class Portfolio extends React.Component {
 				<div id="buttons-container">
 					<Button id="add-stock-btn" onClick={this.showAddStockModal}>Add Stock</Button>
 					<Button id="perf-graph-btn" onClick={this.showPerfGraphModal} 
-							disabled={this.state.stocks.length === 0}>
-							Perf Graph
+							disabled={!this.anyStocksChecked()}>
+							Graph Of Selected
 					</Button>
-					<Button id="delete-selected-btn" onClick={this.deleteStocks}>Remove Selected</Button>
+					<Button id="delete-selected-btn" onClick={this.deleteStocks}
+							disabled={!this.anyStocksChecked()}>
+							Remove Selected
+					</Button>
 				</div>
 				
 
@@ -88,6 +102,7 @@ export default class Portfolio extends React.Component {
 
 
 			</Card>
+			</div>
 		)
 	}
 
@@ -166,7 +181,8 @@ export default class Portfolio extends React.Component {
 					amount: amount,
 					value: amount * closeValue,
 					history : history.reverse(),
-					toBeDeleted: false,
+					checked: false,
+					color: this.generateRandomHexadecimalColor()
 				}]
 			}))	
 		}
@@ -175,11 +191,7 @@ export default class Portfolio extends React.Component {
 		let value = this.calcNewPortfolioValue(this.state.stocks)
 		this.setState({
 			value: value
-		})
-
-		console.log("value updated");
-		
-	
+		})		
 	}
 
 	//Return the new portfolio value
@@ -205,24 +217,49 @@ export default class Portfolio extends React.Component {
 		}))
 	}
 
-	markStocksForDeletion = indicies => {
+	handleCheckedStocks = indicies => {		
 		let updatedStockArr = this.state.stocks
-		indicies.forEach((index) => {
-			updatedStockArr[index].toBeDeleted = !updatedStockArr[index].toBeDeleted 
-		})
+
+		updatedStockArr.forEach((element, index) => {
+			if(indicies.includes(index)) {
+				updatedStockArr[index].checked = !updatedStockArr[index].checked
+			}
+			else if(updatedStockArr[index].checked === true) {
+				updatedStockArr[index].checked = !updatedStockArr[index].checked
+			}
+		});
+
 		this.setState({
 			stocks: updatedStockArr
 		})
 	}
 
+	//Check if atleast one stock is checked
+	//Used to determine whether graph and delete buttons are disabled or not
+	anyStocksChecked = () => {
+		for (let i = 0; i < this.state.stocks.length; i++) {
+			if(this.state.stocks[i].checked === true) return true			
+		}
+		return false
+	}
+
+	getSelectedRows = () => {
+		let rows = []
+		this.state.stocks.forEach((stock, index) => {
+			if(stock.checked === true){
+				rows.push(index)
+			}
+		})
+		return rows
+	}
 
 
 	//Remove all stocks checked for deletion
 	deleteStocks = () => {
 		let stocks = this.state.stocks
 		let newStocks = []
-		stocks.forEach((stock, index) => {
-			if(stock.toBeDeleted === false){
+		stocks.forEach(stock => {
+			if(stock.checked === false){
 				newStocks.push(stock)
 			}
 		})
@@ -236,21 +273,19 @@ export default class Portfolio extends React.Component {
 		})
 
 		//uncheck the selected rows in table
-		this.child.current.clearCheckedRows()
+		this.stocksTable.current.clearCheckedRows()
 
 	}
 
 	handleCurrencyChange = (e) => {
-		console.log("yes");
-		
 		let exchangeRate = null
 		let currency = null
 
-		if(e.target.value === 'USD'){
+		if(e.target.value === '$'){
 			exchangeRate = 1
 			currency = '$'
 		}
-		else if (e.target.value === 'EUR'){
+		else if (e.target.value === '€'){
 			exchangeRate = this.props.euroExchangeRate
 			currency = '€'
 		}
@@ -260,6 +295,11 @@ export default class Portfolio extends React.Component {
 			currentExchangeRate: exchangeRate,
 			currency: currency
 		})
+	}
+
+	//For generating the graph colors for each stock
+	generateRandomHexadecimalColor = () => {
+		return "#" + Math.random().toString(16).slice(2, 8)
 	}
 
 } // end of Portfolio
