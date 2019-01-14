@@ -2,6 +2,7 @@ import React from 'react'
 import Portfolio from './Portfolio'
 import {Button, Row, Col} from 'antd'
 import SimpleStorage from "react-simple-storage";
+import { v4 } from 'uuid';
 
 
 export default class PortfolioContainer extends React.Component {
@@ -23,7 +24,9 @@ export default class PortfolioContainer extends React.Component {
 	render() {
 		return (
 			<div id="portfolio-container">
-				{/* <SimpleStorage parent={this} /> */}
+				{/* For local storage */}
+				<SimpleStorage parent={this} />
+
 				<Button id="add-portfolio-button"
 						type="primary"
 						onClick={this.createNewPortfolio}
@@ -33,11 +36,12 @@ export default class PortfolioContainer extends React.Component {
 				<div>
 					<Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32, xl: 40 }} type="flex" justify="center" align="middle">
 					{
-						this.state.portfolios.map((item, index) => (
-							<Col key={index} xs={24} sm={24} md={24} lg={12} xl={10}>
+						this.state.portfolios.map(item => (
+							<Col key={item.id} xs={24} sm={24} md={24} lg={12} xl={10}>
 								<Portfolio
-									name={item.name} 
+									name={item.name}
 									onRemove={this.removePortfolio}  
+									id={item.id}
 									euroExchangeRate={this.state.euroExchangeRate}
 							
 								/>
@@ -65,6 +69,7 @@ export default class PortfolioContainer extends React.Component {
 		if(portfolioName === null) return	// user clicks cancel
 		let portfolio = {
 			name: portfolioName,
+			id: v4()
 		}
 
 		let exists = false
@@ -84,20 +89,11 @@ export default class PortfolioContainer extends React.Component {
 		}))
 	}
 
-	removePortfolio = (portfolioName) => {
-		let tempArr = this.state.portfolios
-		let newArr = []
+	removePortfolio = (portfolioId) => {
+		let newArr = this.state.portfolios.filter(portfolio => portfolioId !== portfolio.id)
 
-		tempArr.forEach((portfolio) => {
-			if (portfolioName !== portfolio.name) {
-				newArr.push(portfolio)
-			}
-		})
-		
 		// Update state
-		this.setState(({
-			portfolios: newArr
-		}))
+		this.setState({ portfolios: newArr })
 	}
 
 	// Stock API returns in USD, get the exchange rate (USD*exrate) = EUR

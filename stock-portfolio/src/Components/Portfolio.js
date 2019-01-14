@@ -4,7 +4,7 @@ import AddStockModal from './AddStockModal'
 import StocksTable from './StocksTable'
 import PerfGraphModal from './PerfGraphModal';
 import {message, Card, Popconfirm, Button, Radio, Row, Col} from 'antd'
-import SimpleStorage, {clearStorage} from "react-simple-storage";
+import SimpleStorage from "react-simple-storage";
 
 
 
@@ -23,12 +23,12 @@ export default class Portfolio extends React.Component {
 		}
 	}
 
-	render() {	
+	render() {
 		return(		
 			<div>
 
 			{/*For local storage */}
-			{/* <SimpleStorage parent={this} prefix={this.props.name} /> */}
+			<SimpleStorage parent={this} prefix={this.props.id} blacklist={['showAddStockModal', 'showPerfGraphModal']} />
 			<Card 
 				className="portfolio"
 				title={this.props.name}
@@ -38,8 +38,7 @@ export default class Portfolio extends React.Component {
 							okText="Yes" 
 							cancelText="No"
 							onConfirm={() => {
-								this.props.onRemove(this.props.name)
-								
+								this.props.onRemove(this.props.id)
 							}
 				}>
 					<Button icon="close-circle" type="danger" id="remove-portfolio-btn">

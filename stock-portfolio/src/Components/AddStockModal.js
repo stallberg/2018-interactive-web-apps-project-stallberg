@@ -91,12 +91,10 @@ export default class AddStockModal extends React.Component {
 
 	}
 
-	//Only 0-9
+	//Only 0-9 are valid input keys
 	onKeyPress = e => {
 		let valid = /^\d*$/.test(e.key);
 		if(!valid) e.preventDefault()
-		
-		
 		
 	}
 

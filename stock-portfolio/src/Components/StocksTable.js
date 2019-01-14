@@ -83,4 +83,5 @@ StocksTable.propTypes = {
 	currency : PropTypes.string.isRequired,
 	stocks: PropTypes.array.isRequired,
 	handleChecked : PropTypes.func.isRequired,
+	selectedRowKeys: PropTypes.array.isRequired
 }
