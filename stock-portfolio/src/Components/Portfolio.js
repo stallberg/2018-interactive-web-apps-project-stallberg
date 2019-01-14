@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import AddStockModal from './AddStockModal'
 import StocksTable from './StocksTable'
-import Tablee from './Tablee'
 import PerfGraphModal from './PerfGraphModal';
 import {message, Card, Popconfirm, Button, Radio} from 'antd'
 
@@ -12,6 +11,7 @@ export default class Portfolio extends React.Component {
 
 	constructor(props) {
 		super(props)
+		this.child = React.createRef()  //For the table component
 		this.state = {
 			value: 0,
 			stocks : [],
@@ -39,6 +39,7 @@ export default class Portfolio extends React.Component {
 				</Popconfirm>}	
 			>
 				
+				{/* The modals. Hidden by default, and shows when buttons are pressed */}
 				<AddStockModal 
 					show={this.state.showAddStockModal} 
 					onClose={this.showAddStockModal} 
@@ -49,6 +50,8 @@ export default class Portfolio extends React.Component {
 					stocks={this.state.stocks}
 					show={this.state.showPerfGraphModal}
 					onClose={this.showPerfGraphModal}
+					exchangeRate={this.state.currentExchangeRate}
+					currency={this.state.currency}
 				>
 				</PerfGraphModal>
 				
@@ -58,12 +61,14 @@ export default class Portfolio extends React.Component {
 					<Radio value="EUR">EUR</Radio>
 				</Radio.Group>
 				
-				{/* Table display for stocks in portfolio */}
-				<Tablee
+				{/* Table display for the stock information */}
+				<StocksTable
 					exchangeRate={this.state.currentExchangeRate}
 					currency={this.state.currency}
 					stocks={this.state.stocks}
-				></Tablee>
+					handleChecked={this.markStocksForDeletion}
+					ref={this.child}
+				></StocksTable>
 
 				{/* Display portfolio value */}
 				<h3>{"Portfolio value: " + (this.state.value*this.state.currentExchangeRate).toFixed(2) + this.state.currency}</h3>
@@ -200,21 +205,17 @@ export default class Portfolio extends React.Component {
 		}))
 	}
 
-	//Make stock checked for deletion when checkbox is checked
-	// handleChecked = (e) => {
-	// 	let index = e.target.value
-	// 	let stocks = this.state.stocks
-	// 	stocks[index].toBeDeleted = !stocks[index].toBeDeleted
-	// 	this.setState(({
-	// 		stocks : stocks
-	// 	}))
-		
-	// }
-
-	handleChecked = (index) => {
-		let stocks = this.state.stocks
-		stocks[index].toBeDeleted = !stocks[index].toBeDeleted
+	markStocksForDeletion = indicies => {
+		let updatedStockArr = this.state.stocks
+		indicies.forEach((index) => {
+			updatedStockArr[index].toBeDeleted = !updatedStockArr[index].toBeDeleted 
+		})
+		this.setState({
+			stocks: updatedStockArr
+		})
 	}
+
+
 
 	//Remove all stocks checked for deletion
 	deleteStocks = () => {
@@ -234,20 +235,9 @@ export default class Portfolio extends React.Component {
 			value: value
 		})
 
-	}
+		//uncheck the selected rows in table
+		this.child.current.clearCheckedRows()
 
-	deleteStocks2 = (ticker) => {
-		let newState = this.state.stocks.map((stock) => {
-			if(ticker !== stock.ticker){
-				return stock
-			}
-		})
-		let value = this.calcNewPortfolioValue(newState)
-
-		this.setState({
-			stocks: newState,
-			value: value
-		})
 	}
 
 	handleCurrencyChange = (e) => {
