@@ -38,7 +38,9 @@ body {
   color: white;
 }
 
-#perf-graph-btn:disabled {
+#perf-graph-btn:disabled,
+#add-stock-btn:disabled,
+#delete-selected-btn:disabled {
   background-color: lightgray;
   opacity: 0.4;
   color: black;
@@ -48,12 +50,6 @@ body {
   background-color: #f5222d;
   color: white;
   float: right;
-}
-
-#delete-selected-btn:disabled {
-  background-color: lightgray;
-  opacity: 0.4;
-  color: black;
 }
 
 #currency-selector {

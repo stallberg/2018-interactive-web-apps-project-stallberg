@@ -84,7 +84,10 @@ export default class Portfolio extends Component {
 				
 				{/* Container for all the buttons */}
 				<div id="buttons-container">
-					<Button id="add-stock-btn" onClick={this.showAddStockModal}>Add Stock</Button>
+					<Button id="add-stock-btn"
+							onClick={this.showAddStockModal}
+							disabled={this.state.stocks.length >= 50}
+							>Add Stock</Button>
 					<Button id="perf-graph-btn" onClick={this.showPerfGraphModal} 
 							disabled={!this.anyStocksChecked()}>
 							Graph Of Selected
@@ -94,10 +97,6 @@ export default class Portfolio extends Component {
 							Remove Selected
 					</Button>
 				</div>
-				
-
-				
-
 
 			</Card>
 			</div>
