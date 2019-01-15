@@ -1,6 +1,7 @@
 {
   "name": "stock-portfolio",
   "version": "0.1.0",
+  "homepage": "https://github.com/it-teaching-abo-akademi/2018-interactive-web-apps-project-stallberg",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^3.7.0",
