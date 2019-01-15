@@ -1,15 +1,14 @@
-import React from 'react'
+import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer} from 'recharts'
-import {Modal, DatePicker, Row, Col} from 'antd'
+import {Modal, DatePicker, message, Row} from 'antd'
 import moment from 'moment';
-
 
 const { RangePicker } = DatePicker;
 
+const dateFormat = 'DD/MM/YYYY'
 
-
-export default class PerfGraphModal extends React.Component {
+export default class PerfGraphModal extends Component {
 
 	constructor(props) {
 		super(props)
@@ -28,10 +27,11 @@ export default class PerfGraphModal extends React.Component {
 		//Every stock history has same lenght, so just picking first one
 		let historySize = this.props.stocks[0]['history'].length
 		let startDate, endDate
-
+		
+		//Use start and end sent via props until user has given own start and end dates
 		if(this.state.startDate === "" && this.state.endDate === "") {
-			startDate = this.props.stocks[0]['history'][0]['date']
-			endDate = this.props.stocks[0]['history'][historySize - 1]['date']
+			startDate = this.props.startAndEndDates[0]
+			endDate = this.props.startAndEndDates[1]
 		}
 		else {
 			startDate = this.state.startDate
@@ -42,68 +42,62 @@ export default class PerfGraphModal extends React.Component {
 		let data = this.generateChartDataList(this.props.stocks, startDate, endDate)
 		let dataKeys = this.generateChartDataKeys(this.props.stocks)
 
-
 		return(
 			<div>
-				{/* For local storage */}
-				{/* <SimpleStorage parent={this} /> */}
+
 				<Modal
 					title="Performance Graph"
 					visible={this.props.show}
 					onOk={this.props.onClose}
 					onCancel={this.props.onClose}
-					width={800}
+					width={"80%"}
 					footer={null}
 				>
-					{/* <div id="perf-graph"> */}
-						<ResponsiveContainer width="100%" height={400}>
-							<LineChart data={data}>
-								{
-									dataKeys.map((item, index) => (
-										<Line
-											type="monotone"
-											dataKey={item.ticker}
-											key={index}
-											dot={false}
-											unit={this.props.currency}
-											stroke={item.color}>
-										</Line>
-									))
-								}
-								<CartesianGrid stroke="#ccc" />
-								<XAxis dataKey="date" />
-								<YAxis />
-								<Tooltip/>
-								<Legend />
-							</LineChart>
-						</ResponsiveContainer>
-					{/* </div> */}
-					
-					<Row type="flex" justify="center">
-						<Col span={24}>
-						<RangePicker
-							defaultValue={[moment(startDate, 'DD/MM/YYYY'), moment(endDate, 'DD/MM/YYYY')]}
-							format={'DD/MM/YYYY'}
-							showTime={{hideDisabledOptions: true}}
-							disabledDate={this.disabledDate}
-							onChange={this.onChange}
-							onOk={this.handleOk}
-						/>
-						</Col>
-						</Row>
 
+				<ResponsiveContainer width="100%" height={600}>
+					<LineChart data={data}>
+						{
+							dataKeys.map((item, index) => (
+								<Line
+									type="monotone"
+									dataKey={item.ticker}
+									key={index}
+									dot={false}
+									unit={this.props.currency}
+									stroke={item.color}>
+								</Line>
+							))
+						}
+						<CartesianGrid stroke="#ccc" />
+						<XAxis dataKey="date" />
+						<YAxis />
+						<Tooltip/>
+						<Legend />
+					</LineChart>
+				</ResponsiveContainer>
 				
+				{/* Date picker for selecting start and end date */}	
+				<Row id ="date-picker-container" type="flex" justify="center">
+				<RangePicker
+					defaultValue={[moment(startDate, dateFormat), moment(endDate, dateFormat)]}
+					format={dateFormat}
+					showTime={{hideDisabledOptions: true}}
+					onOk={this.handleOk}
+					ranges={{
+							'Whole History': [moment(this.props.startAndEndDates[0], dateFormat), 
+											moment(this.props.startAndEndDates[1], dateFormat)],
+							'This Month': [moment().startOf('month'), moment().endOf('month')]
+					}}
+				/>
+				</Row>
 
 				</Modal>
 			</div>
 
-
-
-
-
 		)
 	}
 
+	// Data object for chart library
 	generateChartDataList = (stocks, startDate, endDate) => {
 		 //all stock historys are the same length, pick one
 		let historyLength = stocks[0]['history'].length
@@ -128,30 +122,31 @@ export default class PerfGraphModal extends React.Component {
 	//Data keys for the Rechart graph library
 	generateChartDataKeys = (stocks) => {
 		return stocks.map(stock => {
-			// if(stock.checked === true){
-				return {
-					ticker: stock.ticker,
-					color: stock.color,
-				}
-			// }
+			return {
+				ticker: stock.ticker,
+				color: stock.color,
+			}
 		})
 	}
 
-	disabledDate = (current) => {
-		//console.log(current && current < moment().endOf('day'));
-		// return current && current < moment(this.state.startDate, this.state.dateFormat)       
-   }
 
-   //When user clicks ok after slecting start and end date
+   //When user clicks ok after selecting start and end date
 	handleOk = (dates) => {
-	   let startDate = this.createEuropeanDateString(dates[0].toDate())
-	   let endDate = this.createEuropeanDateString(dates[1].toDate())
+	   //No history exists outside the min and max range
+	   let minDate = moment(this.props.startAndEndDates[0], dateFormat)
+	   let maxDate = moment(this.props.startAndEndDates[1], dateFormat)
+
+	   //If no history is found
+	   if(dates[1] < minDate || dates[0] > maxDate) {
+		   message.info(
+			   `No historical data found between ${dates[0].format('DD/MM/YYYY')} and ${dates[1].format('DD/MM/YYYY')}`
+			)
+	   }
 
 	   this.setState(({
-		startDate: startDate,
-		endDate: endDate,
+		startDate: this.createEuropeanDateString(dates[0].toDate()),
+		endDate: this.createEuropeanDateString(dates[1].toDate()),
 		}))
-	//    console.log(startDate, endDate);
 	   
    }
 
@@ -164,7 +159,7 @@ export default class PerfGraphModal extends React.Component {
 		return new Date(parts[2], parts[1] - 1, parts[0])
 	}
 
-
+	//Used to filter out data when choosing custom start and end date
 	isDateInRange = (date, start, end) => {
 		let d = this.createDateObject(date)
 		let startDate = this.createDateObject(start)
@@ -173,10 +168,8 @@ export default class PerfGraphModal extends React.Component {
 		if(d >= startDate && d <= endDate) {
 			return true
 		}
-		return false
-		 
+		return false	 
 	}
-
 }
 
 PerfGraphModal.propTypes = {
@@ -185,4 +178,5 @@ PerfGraphModal.propTypes = {
 	show: PropTypes.bool.isRequired,
 	currency: PropTypes.string.isRequired,
 	exchangeRate: PropTypes.number.isRequired,
+	startAndEndDates: PropTypes.array
 }

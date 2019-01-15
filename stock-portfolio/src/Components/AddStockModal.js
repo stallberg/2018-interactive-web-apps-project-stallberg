@@ -1,8 +1,8 @@
-import React from 'react'
+import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import {Modal, Input, message} from 'antd'
 
-export default class AddStockModal extends React.Component {
+export default class AddStockModal extends Component {
 
 	constructor(props) {
 		super(props)

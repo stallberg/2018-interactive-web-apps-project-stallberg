@@ -5,8 +5,8 @@ const {Header, Content} = Layout
 
 const App = () => {
     return(
-        <div >
-            <Layout style={{height: "100%", width:"100%"}}>
+        <div>
+            <Layout id="layout">
                 <Header id="main-header">
                     <h1 id="main-header-text">SPMS</h1>
                 </Header>

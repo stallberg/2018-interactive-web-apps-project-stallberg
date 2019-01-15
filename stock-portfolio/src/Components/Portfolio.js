@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import AddStockModal from './AddStockModal'
 import StocksTable from './StocksTable'
@@ -8,11 +8,10 @@ import SimpleStorage from "react-simple-storage";
 
 
 
-export default class Portfolio extends React.Component {
+export default class Portfolio extends Component {
 
 	constructor(props) {
 		super(props)
-		this.stocksTable = React.createRef()  //For the table component
 		this.state = {
 			value: 0,
 			stocks : [],
@@ -25,7 +24,7 @@ export default class Portfolio extends React.Component {
 
 	render() {
 		return(		
-			<div>
+			<div className="portfolio">
 
 			{/*For local storage */}
 			<SimpleStorage parent={this} prefix={this.props.id} blacklist={['showAddStockModal', 'showPerfGraphModal']} />
@@ -61,6 +60,7 @@ export default class Portfolio extends React.Component {
 					onClose={this.showPerfGraphModal}
 					exchangeRate={this.state.currentExchangeRate}
 					currency={this.state.currency}
+					startAndEndDates={this.getStartAndEndHistoryDates()}
 				>
 				</PerfGraphModal>
 				
@@ -77,7 +77,6 @@ export default class Portfolio extends React.Component {
 					stocks={this.state.stocks}
 					handleChecked={this.handleCheckedStocks}
 					selectedRowKeys={this.getSelectedRows()}
-					ref={this.stocksTable}
 				></StocksTable>
 
 				{/* Display portfolio value */}
@@ -216,21 +215,26 @@ export default class Portfolio extends React.Component {
 		}))
 	}
 
-	handleCheckedStocks = indicies => {		
+	//Update marked stocks when user checks a stock in the table
+	//Sent as a "callback" to the StocksTable component
+	handleCheckedStocks = indicies => {
 		let updatedStockArr = this.state.stocks
 
-		updatedStockArr.forEach((element, index) => {
-			if(indicies.includes(index)) {
-				updatedStockArr[index].checked = !updatedStockArr[index].checked
+		updatedStockArr.forEach((_, index) => {
+			
+			if(indicies.includes(index)) {	
+				updatedStockArr[index].checked = true		
 			}
-			else if(updatedStockArr[index].checked === true) {
-				updatedStockArr[index].checked = !updatedStockArr[index].checked
+			else {
+				updatedStockArr[index].checked = false
 			}
+
 		});
 
 		this.setState({
 			stocks: updatedStockArr
 		})
+		
 	}
 
 	//Check if atleast one stock is checked
@@ -242,6 +246,7 @@ export default class Portfolio extends React.Component {
 		return false
 	}
 
+	//Get all checked/selected stocks, sent as prop to StocksTable
 	getSelectedRows = () => {
 		let rows = []
 		this.state.stocks.forEach((stock, index) => {
@@ -253,32 +258,22 @@ export default class Portfolio extends React.Component {
 	}
 
 
-	//Remove all stocks checked for deletion
+	//Remove all selected stocks
 	deleteStocks = () => {
-		let stocks = this.state.stocks
-		let newStocks = []
-		stocks.forEach(stock => {
-			if(stock.checked === false){
-				newStocks.push(stock)
-			}
+		let updatedStocks = this.state.stocks.filter(stock => {
+			return !stock.checked
 		})
 
-		let value = this.calcNewPortfolioValue(newStocks)
-
-		//update state
+		let value = this.calcNewPortfolioValue(updatedStocks)
 		this.setState({
-			stocks: newStocks,
+			stocks: updatedStocks,
 			value: value
 		})
-
-		//uncheck the selected rows in table
-		this.stocksTable.current.clearCheckedRows()
-
 	}
 
+	//When user changes currency
 	handleCurrencyChange = (e) => {
-		let exchangeRate = null
-		let currency = null
+		let exchangeRate, currency
 
 		if(e.target.value === '$'){
 			exchangeRate = 1
@@ -289,11 +284,23 @@ export default class Portfolio extends React.Component {
 			currency = '€'
 		}
 
-		//This will trigget a rerender with the updated stocks and portfolio values in the selected currency
+		//This will trigger a rerender with the values in the selected currency
 		this.setState({
 			currentExchangeRate: exchangeRate,
 			currency: currency
 		})
+	}
+
+	//Sent to the graph modal component
+	getStartAndEndHistoryDates = () => {
+		if(this.state.stocks.length >= 1) {
+			let len = this.state.stocks[0].history.length
+			let start = this.state.stocks[0].history[0]['date']
+			let end = this.state.stocks[0].history[len-1]['date']
+			return [start, end]
+		}
+
+		return null
 	}
 
 	//For generating the graph colors for each stock

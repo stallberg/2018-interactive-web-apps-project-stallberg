@@ -1,8 +1,10 @@
 
-#main-content {
+body {
+  background-color: #e8e8e8
 }
 
-#main-header {
+#layout {
+  background-color: #e8e8e8
 }
 
 #main-header-text {
@@ -18,7 +20,7 @@
 }
 
 .portfolio {
-  margin-bottom: 2%;
+  margin-bottom: 3%;
 }
 
 .add-modal-input {
@@ -64,6 +66,15 @@
 
 #buttons-container {
   margin-top: 3%;
+}
+
+#date-picker-container {
+  margin-top: 1%;
+}
+
+/* Override the ant design css for table header color */
+thead[class*="ant-table-thead"] th{
+  background-color: #e8e8e8 !important;
 }
 
 /* Remove right floating on delete button when small screen */

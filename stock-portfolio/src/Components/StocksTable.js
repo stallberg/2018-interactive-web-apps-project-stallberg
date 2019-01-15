@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import {Table} from 'antd'
 
@@ -21,7 +21,7 @@ const columns = [{
 }]
 
 
-export default class StocksTable extends React.Component {
+export default class StocksTable extends Component {
 
 	render() {
 		let data = this.createDataObject(this.props.stocks, this.props.exchangeRate, this.props.currency)
@@ -31,8 +31,7 @@ export default class StocksTable extends React.Component {
 
 				<Table rowSelection={
 					{
-						onChange: (keys, a, b) => {
-							this.onSelectChange(keys)
+						onChange: (keys) => {	
 							this.props.handleChecked(keys)
 						},
 						selectedRowKeys: this.props.selectedRowKeys,
@@ -49,6 +48,7 @@ export default class StocksTable extends React.Component {
 		)
 	}
 
+	//Create data source object for Ant Design table component
 	createDataObject = (stocks, exchangeRate, currency) => {
 		//ticker, amount, value  
 		return stocks.map((element, index) => {
@@ -61,16 +61,6 @@ export default class StocksTable extends React.Component {
 			}
 		});
 	}
-
-	clearCheckedRows = () => {
-		this.setState({
-			selectedRowKeys: []
-		})
-	}
-
-	onSelectChange = (selectedRowKeys) => {
-		this.setState({ selectedRowKeys });
-	  }
 }
 
 
