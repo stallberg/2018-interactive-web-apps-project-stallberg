@@ -13,9 +13,9 @@ export default class PortfolioContainer extends React.Component {
 			portfolios: [],
 			euroExchangeRate: null
 		}
-
 	}
 
+	//fetch the euro exchange rate
 	componentDidMount() {
 		this.getCurrencyExchangeRates()
 	}

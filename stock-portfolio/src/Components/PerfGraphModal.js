@@ -1,9 +1,9 @@
-import React, { isValidElement } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import {LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer} from 'recharts'
-import {Modal, DatePicker} from 'antd'
+import {Modal, DatePicker, Row, Col} from 'antd'
 import moment from 'moment';
-import SimpleStorage from "react-simple-storage";
+
 
 const { RangePicker } = DatePicker;
 
@@ -79,7 +79,8 @@ export default class PerfGraphModal extends React.Component {
 						</ResponsiveContainer>
 					{/* </div> */}
 					
-					<div id="date-picker">
+					<Row type="flex" justify="center">
+						<Col span={24}>
 						<RangePicker
 							defaultValue={[moment(startDate, 'DD/MM/YYYY'), moment(endDate, 'DD/MM/YYYY')]}
 							format={'DD/MM/YYYY'}
@@ -88,7 +89,9 @@ export default class PerfGraphModal extends React.Component {
 							onChange={this.onChange}
 							onOk={this.handleOk}
 						/>
-					</div>
+						</Col>
+						</Row>
+
 				
 
 				</Modal>

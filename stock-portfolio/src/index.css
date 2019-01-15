@@ -21,14 +21,6 @@
   margin-bottom: 2%;
 }
 
-#date-picker  {
-
-}
-
-#datepicker-container {
-  /* border: 1px solid black; */
-}
-
 .add-modal-input {
   margin-bottom: 20px;
 }
@@ -72,4 +64,12 @@
 
 #buttons-container {
   margin-top: 3%;
+}
+
+/* Remove right floating on delete button when small screen */
+@media only screen and (max-width : 480px) {
+  #delete-selected-btn {
+    margin-top: 2%;
+    float: none;
+  }
 }

@@ -23,10 +23,6 @@ const columns = [{
 
 export default class StocksTable extends React.Component {
 
-	constructor(props) {
-		super(props)
-	}
-
 	render() {
 		let data = this.createDataObject(this.props.stocks, this.props.exchangeRate, this.props.currency)
 
